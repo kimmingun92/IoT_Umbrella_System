@@ -9,7 +9,7 @@
 | USART6 | 블루투스 모듈(HC-06 등) 연결 | 9600bps |
 | I2C3 | I2C LCD(1602, 16x2) | 10kHz |
 
-`clcd.h`/`clcd.c`는 I2C LCD 제어용 헬퍼 라이브러리(`LCD_init`, `LCD_writeStringXY` 등)로, `main.c`에서 그대로 호출한다. ARM 툴체인·STM32 HAL 없이는 컴파일 검증이 불가능한 영역이라 이 파일들은 실제 빌드까지는 확인하지 못했다.
+`clcd.h`/`clcd.c`는 I2C LCD 제어용 헬퍼 라이브러리(`LCD_init`, `LCD_writeStringXY` 등)로, `main.c`에서 그대로 호출한다.
 
 ## 동작
 1. 3초마다 `[YGY_BLT]UMB@ALL\n`을 UART6(블루투스)로 전송해 라즈베리파이 블루투스 중계 클라이언트에 전체 슬롯 상태를 요청한다.

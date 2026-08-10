@@ -17,7 +17,12 @@ sudo cp *.php index.html /var/www/html/
 
 DB 접속 정보(`localhost`/`iot`/`pwiot`/`iotdb`)는 각 PHP 파일 상단에서 환경에 맞게 수정한다.
 
-## 실제 동작 검증
-`api.php`의 4개 액션(store/retrieve/wet/theft)과 `slotTable.php`/`logTable.php`/`userTable.php`를 실제 PHP 내장 서버 + MariaDB로 기동해 전부 실행 확인했다. 회수 시 UID 불일치(FAIL: UID_MISMATCH), 존재하지 않는 action(ERROR: unknown action), 슬롯 파라미터 누락(ERROR: invalid slot) 등 예외 케이스도 검증됨.
+## api.php 액션
+| action | 파라미터 | 동작 |
+|---|---|---|
+| `store` | `slot`, `uid`, `dry` | `user` 테이블에 UID 등록, `slot`을 USING으로 갱신, `log`에 STORE 기록 |
+| `retrieve` | `slot`, `uid` | `slot.assigned_uid`와 비교해 일치 시 EMPTY로 갱신 + PICKUP 로그, 불일치 시 AUTH_FAIL 로그 |
+| `wet` | `slot`, `dry` | `dry` 값에 따라 slot을 DRYING/DRY_DONE으로 갱신 |
+| `theft` | `slot` | `slot`을 THEFT로 갱신, THEFT 로그 기록 |
 
-**수정 사항**: `userTable.php`가 원래 `$row['uid']`를 읽고 있었는데, `user` 테이블의 실제 컬럼명은 `card_uid`라서(스키마 참고) 등록 사용자 UID 칸이 항상 빈 값으로 표시되는 문제가 있었다. `$row['card_uid']`로 수정해 반영했다.
+예: `GET /api.php?action=store&slot=1&uid=A3F20C11&dry=0`

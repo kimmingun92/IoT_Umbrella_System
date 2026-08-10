@@ -45,15 +45,12 @@ RFID 리더(MFRC522) 1, RFID 카드 3, 서보모터(SG90) 3, IR 센서 3, 수위
 ```
 각 폴더의 상세 빌드/실행 방법은 폴더별 README를 참고.
 
-## 동작 검증
-로컬에 MariaDB + PHP + gcc/libmysqlclient/libbluetooth 개발환경을 실제로 구축해 다음을 검증했다.
-- `sql/schema.sql` 적용 및 초기 슬롯 3개 생성 확인
-- `web/api.php`의 store/retrieve/wet/theft 4개 액션과 예외 케이스(UID 불일치, 잘못된 action, 슬롯 누락)를 실제 HTTP 요청으로 호출해 DB 반영 확인
-- `web/slotTable.php`, `logTable.php`, `userTable.php`가 실시간 DB 데이터를 정상 렌더링하는지 확인
-- `raspberrypi/` 4개 C 파일(`iot_server.c`, `iot_client.c`, `iot_client_sensor_device.c`, `iot_client_bluetooth.c`) 전부 실제 컴파일 성공(`gcc`, `-lmysqlclient`, `-lbluetooth`, `-lpthread`)
-- 서버·DB클라이언트를 기동해 실제 TCP 소켓으로 `STORE`/`WET`/`RETRIEVE` 메시지를 보내 서버 라우팅과 DB 클라이언트의 메시지 파싱 로직이 동작함을 확인
-
-Arduino(`.ino`)와 STM32(`main.c`+HAL)는 각각 Arduino IDE, STM32CubeIDE + ARM 툴체인이 필요해 이 환경에서는 컴파일 검증까지는 하지 못했다.
+## 빌드 및 실행
+1. **DB**: `mysql -u root -p < sql/schema.sql` 로 `iotdb` 및 `user`/`slot`/`log` 테이블 생성
+2. **Raspberry Pi**: `raspberrypi/README.md` 참고해 `iot_server`, `iot_client_sensor_device`, `iot_client_bluetooth` 빌드 후 순서대로 실행
+3. **Arduino**: `arduino/umbrella_system.ino`을 Arduino IDE에서 열어 WiFi/서버 정보(`AP_SSID`, `SERVER_NAME` 등) 수정 후 업로드
+4. **STM32**: STM32CubeIDE에서 USART2/USART6/I2C3 설정으로 프로젝트 생성 후 `stm32/main.c`, `clcd.h`, `clcd.c`로 교체해 빌드
+5. **웹**: `web/*.php`, `index.html`을 Apache 문서 루트(`/var/www/html`)에 복사
 
 ## 동작 시나리오
 1. **우산 보관**: 빈 슬롯에 RFID 태그 → 서보 열림 → 우산 삽입(IR 감지) → 서보 잠금 → DB에 슬롯번호+UID+시간 기록 → 수위센서로 젖은 정도 측정 후 DC모터(팬) 가동
@@ -89,5 +86,3 @@ Arduino(`.ino`)와 STM32(`main.c`+HAL)는 각각 Arduino IDE, STM32CubeIDE + ARM
 - TCP와 Bluetooth라는 이기종 통신 경로를 하나의 메시지 규격으로 통합해 라우팅하는 프로토콜 설계 경험을 쌓음
 - 멀티스레드 서버에서 클라이언트 인증·라우팅·DB 트랜잭션을 계층적으로 설계하는 경험을 함
 
-## 참고
-- `web/userTable.php`는 원본에서 `$row['uid']`를 읽던 것을 `user` 테이블의 실제 컬럼명(`card_uid`)에 맞게 `$row['card_uid']`로 수정했다(자세한 내용은 `web/README.md` 참고).
