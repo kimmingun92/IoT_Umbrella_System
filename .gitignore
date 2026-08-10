@@ -1,0 +1,24 @@
+# 빌드 산출물
+*.o
+*.out
+*.elf
+*.hex
+*.bin
+raspberrypi/iot_server
+raspberrypi/iot_client
+raspberrypi/iot_client_sensor_device
+raspberrypi/iot_client_bluetooth
+
+# 실제 계정정보가 담긴 파일 (예시 파일만 커밋)
+raspberrypi/idpasswd.txt
+
+# STM32CubeIDE
+Debug/
+Release/
+.settings/
+*.launch
+
+# 에디터/OS
+.vscode/
+.DS_Store
+Thumbs.db
